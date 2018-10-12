@@ -1,53 +1,17 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import nachos.threads.KThreadWithTimestamp;
 import java.util.PriorityQueue;
 
 /**
  * Uses the hardware timer to provide preemption, and to allow threads to sleep
  * until a certain time.
+ *
+ * @author sjt-moon
  */
 public class Alarm {
-    final PriorityQueue<KThreadWithTimestamp> waitQueue = new PriorityQueue<>((t1, t2) -> {
-        t1.getTimestamp() - t2.getTimestamp();
-    })
-
-	final class KThreadWithTimestamp {
-	    private KThread thread;
-	    private long timestamp;
-
-	    public KThreadWithTimestamp(Builder builder) {
-            this.thread = builder.thread;
-            this.timestamp = builder.timestamp;
-        }
-
-        public long getTimestamp() {return this.timestamp;}
-
-        public KThread getThread() {return this.thread;}
-
-        public static class Builder {
-	        private KThread thread;
-	        private long timestamp;
-
-	        public static Builder newInstance() {return new Builder();}
-
-	        private Builder() {}
-
-	        public Builder setKThread(KThread thread) {
-	            this.thread = thread;
-	            return this;
-            }
-
-            public Builder setTimestamp(long timestamp) {
-	            this.timestamp = timestamp;
-	            return this;
-            }
-
-            public KThreadWithTimestamp build() {
-	            return new KThreadWithTimestamp(this);
-            }
-        }
-    }
+    final PriorityQueue<KThreadWithTimestamp> waitQueue = new PriorityQueue<>((t1, t2) -> (int)(t1.getTimestamp() - t2.getTimestamp()));
 
 	/**
 	 * Allocate a new Alarm. Set the machine's timer interrupt handler to this
@@ -71,7 +35,6 @@ public class Alarm {
 	 * should be run.
 	 */
 	public void timerInterrupt() {
-	    // KThread.currentThread().yield();
         Machine.interrupt().disable();
         while (!waitQueue.isEmpty() && waitQueue.peek().getTimestamp() <= Machine.timer().getTime()) {
             waitQueue.poll().getThread().ready();
@@ -92,12 +55,8 @@ public class Alarm {
 	 * @see nachos.machine.Timer#getTime()
 	 */
 	public void waitUntil(long x) {
-		// for now, cheat just to get something working (busy waiting is bad)
-		// long wakeTime = Machine.timer().getTime() + x;
-		// while (wakeTime > Machine.timer().getTime())
-		//  	KThread.yield();
         Machine.interrupt().disable();
-        KThreadWithTimestamp kThreadWithTimestamp = KThreadWithTimestamp.Builder.newInstance()
+        KThreadWithTimestamp kThreadWithTimestamp = new KThreadWithTimestamp.Builder()
                 .setKThread(KThread.currentThread())
                 .setTimestamp(Machine.timer().getTime() + x)
                 .build();
