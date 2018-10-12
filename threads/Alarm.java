@@ -2,6 +2,8 @@ package nachos.threads;
 
 import nachos.machine.*;
 import nachos.threads.KThreadWithTimestamp;
+
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 /**
@@ -11,7 +13,13 @@ import java.util.PriorityQueue;
  * @author sjt-moon
  */
 public class Alarm {
-    final PriorityQueue<KThreadWithTimestamp> waitQueue = new PriorityQueue<>((t1, t2) -> (int)(t1.getTimestamp() - t2.getTimestamp()));
+
+    final PriorityQueue<KThreadWithTimestamp> waitQueue = new PriorityQueue<>(new Comparator<KThreadWithTimestamp>() {
+        @Override
+        public int compare(KThreadWithTimestamp o1, KThreadWithTimestamp o2) {
+            return o1.getTimestamp() > o2.getTimestamp() ? 1 : -1;
+        }
+    });
 
 	/**
 	 * Allocate a new Alarm. Set the machine's timer interrupt handler to this
@@ -56,10 +64,7 @@ public class Alarm {
 	 */
 	public void waitUntil(long x) {
         Machine.interrupt().disable();
-        KThreadWithTimestamp kThreadWithTimestamp = new KThreadWithTimestamp.Builder()
-                .setKThread(KThread.currentThread())
-                .setTimestamp(Machine.timer().getTime() + x)
-                .build();
+        KThreadWithTimestamp kThreadWithTimestamp = new KThreadWithTimestamp(KThread.currentThread(), Machine.timer().getTime() + x);
         waitQueue.offer(kThreadWithTimestamp);
         KThread.currentThread().sleep();
 	}

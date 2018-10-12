@@ -53,7 +53,7 @@ public class ThreadedKernel extends Kernel {
 		if (Machine.bank() != null) {
 			ElevatorBank.selfTest();
 		}
-		//AlarmTest.test1();
+		AlarmTest.test1();
 	}
 
 	/**
