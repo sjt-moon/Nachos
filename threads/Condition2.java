@@ -1,6 +1,7 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import nachos.threads.ThreadKernel;
 
 /**
  * An implementation of condition variables that disables interrupt()s for
@@ -12,6 +13,14 @@ import nachos.machine.*;
  * @see nachos.threads.Condition
  */
 public class Condition2 {
+
+	private Lock conditionLock;
+
+	/**
+	 * where joined threads are stored
+	 */
+	private ThreadQueue waitQueue = ThreadKernel.scheduler.newThreadQueue(true);
+
 	/**
 	 * Allocate a new condition variable.
 	 * 
@@ -33,7 +42,8 @@ public class Condition2 {
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 
 		conditionLock.release();
-
+		Machine.interrupt().disable();
+		waitQueue.waitForAccess(KThread.currentThread());
 		conditionLock.acquire();
 	}
 
@@ -52,6 +62,4 @@ public class Condition2 {
 	public void wakeAll() {
 		Lib.assertTrue(conditionLock.isHeldByCurrentThread());
 	}
-
-	private Lock conditionLock;
 }

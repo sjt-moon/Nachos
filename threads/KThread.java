@@ -285,6 +285,11 @@ public class KThread {
 
 		Lib.assertTrue(this != currentThread);
 
+		if (status == statusFinished) return;
+
+		/*
+		* sleep: mark current thread as blocked & runNextThread */
+		KThread.sleep();
 	}
 
 	/**
@@ -465,4 +470,9 @@ public class KThread {
 	private static KThread toBeDestroyed = null;
 
 	private static KThread idleThread = null;
+
+    /**
+     * Condition variable: wait queue stores the joined threads
+     */
+    private Condition2
 }

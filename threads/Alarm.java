@@ -63,6 +63,9 @@ public class Alarm {
 	 */
 	public void waitUntil(long x) {
         Machine.interrupt().disable();
+        if (x <= 0) {
+            return;
+        }
         KThreadWithTimestamp kThreadWithTimestamp = new KThreadWithTimestamp.Builder()
                 .setKThread(KThread.currentThread())
                 .setTimestamp(Machine.timer().getTime() + x)
