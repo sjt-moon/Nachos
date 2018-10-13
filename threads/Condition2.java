@@ -43,7 +43,14 @@ public class Condition2 {
 
 		conditionLock.release();
 		Machine.interrupt().disable();
+
+		/*
+		* push into waiting queue of the joined thread */
 		waitQueue.waitForAccess(KThread.currentThread());
+
+		/*
+		* mark current thread as blocked & run next thread */
+		KThread.sleep();
 		conditionLock.acquire();
 	}
 
